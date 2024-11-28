@@ -1,4 +1,4 @@
-<div id="header" class="w-full min-h-20 relative top-0 flex justify-between bg-gray-200">
+<header class="w-full min-h-20 relative top-0 mb-auto flex justify-between bg-gray-200">
 
     <div id="logo" class="flex p-6 items-center">
         <a class="text-2xl font-semibold text-gray-600 hover:text-gray-900 focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500"
@@ -23,4 +23,4 @@
             @endauth
         </div>
     @endif
-</div>
+</header>

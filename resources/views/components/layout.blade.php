@@ -6,17 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     @vite('resources/css/app.css')
-    <title>Book Marketplace</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
 </head>
 
-<body class="min-h-screen flex flex-col bg-gray-100">
-    <x-header></x-header>
+<body class="min-h-screen flex flex-col justify-between bg-gray-100">
+    <x-header />
 
-    <section>
-        {{ $slot }}
-    </section>
+    <x-searchbar />
 
-    <x-footer></x-footer>
+    {{ $slot }}
+
+    <x-footer />
 </body>
 
 </html>
