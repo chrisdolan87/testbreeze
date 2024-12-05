@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ReviewController extends Controller
 {
@@ -19,29 +20,28 @@ class ReviewController extends Controller
 
 
 
-    public function create(Request $request)
+    public function create($book_id)
     {
-        $book_id = $request->input('book_id'); // Retrieve book_id from the GET request
-        $book_slug = $request->input('book_slug'); // Retrieve book_slug from the GET request
-
         return view('review-form', [
-            'book_id' => $book_id,
-            'book_slug' => $book_slug
+            'book_id' => $book_id
         ]);
     }
 
 
 
-    public function store(Request $request)
+    public function store(Request $request, $book_id)
     {
-        $book_id = $request->input('book_id'); // Retrieve book_id from the GET request
-        $book_slug = $request->input('book_slug'); // Retrieve book_slug from the GET request
         $user_id = Auth::user()->id;
+        $book = Book::find($book_id);
 
-        // Validate 
-        $attributes = request()->validate([
-            'book_id' => ['required'],
-            'rating' => ['required'],
+        // Make sure a book with this book_id exists in the db
+        if (!Book::where('id', $book_id)->exists()) {
+            return redirect("/reviews/$book->slug")->with('error', 'Book not found.');
+        }
+
+        // Validate form inputs
+        $attributes = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'review' => ['required', 'min:20']
         ]);
 
@@ -52,17 +52,17 @@ class ReviewController extends Controller
 
         // If there is already a review for this book by this user, redirect back
         if ($existingReview) {
-            return redirect("/reviews/$book_slug")->with('error', 'You have already reviewed this book.');
+            return redirect("/reviews/$book->slug")->with('error', 'You have already reviewed this book.');
         }
 
         Review::create([
-            'user_id' => Auth::user()->id,
-            'book_id' => $attributes['book_id'],
+            'user_id' => $user_id,
+            'book_id' => $book_id,
             'rating' => $attributes['rating'],
             'review' => $attributes['review'],
         ]);
 
-        return redirect("/reviews/$book_slug")->with('review-added', 'Review added!');
+        return redirect("/reviews/$book->slug")->with('review-added', 'Review added!');
     }
 
 
@@ -88,34 +88,32 @@ class ReviewController extends Controller
     {
         // Retrieve the review by ID
         $review = Review::find($review_id);
-    
+
         // If the review doesn't exist, redirect back with an error message
         if (!$review) {
             return redirect()->back()->withErrors('Review not found.');
         }
-    
+
         // Validate the incoming request
         $attributes = $request->validate([
             'rating' => ['required'],
             'review' => ['required', 'min:20'],
         ]);
-    
+
         // Update the review with validated data
         $review->update([
             'rating' => $attributes['rating'],
             'review' => $attributes['review'],
         ]);
-    
+
         // Redirect back to the review page with a success message
         return redirect("/reviews/{$review->book->slug}")->with('review-updated', 'Review updated successfully!');
     }
-    
 
 
-    public function destroy(Request $request, $review_id)
+
+    public function destroy($review_id)
     {
-        $book_slug = $request->input('book_slug');
-
         // Retrieve the review by ID
         $review = Review::find($review_id);
 
@@ -127,6 +125,6 @@ class ReviewController extends Controller
         // Delete the review
         $review->delete();
 
-        return redirect("/reviews/$book_slug")->with('review-deleted', 'Review deleted!');
+        return redirect("/reviews/{$review->book->slug}")->with('review-deleted', 'Review deleted!');
     }
 }

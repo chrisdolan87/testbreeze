@@ -70,13 +70,32 @@ Route::get('/users/{user:username}', function (User $user) {
     ]);
 });
 
+Route::get('/search', function (Request $request) {
+    $search = $request->input('search');
+
+    $books = Book::latest()
+        ->with(['author', 'genre'])
+        ->where('title', 'LIKE', "%{$search}%") // Search in title
+        ->orWhereHas('author', function ($query) use ($search) {
+            $query->where('name', 'LIKE', "%{$search}%"); // Search in author's name
+        })
+        ->orWhereHas('genre', function ($query) use ($search) {
+            $query->where('name', 'LIKE', "%{$search}%"); // Search in genre's name
+        })
+        ->paginate(12);
+
+    return view('home', [
+        'books' => $books
+    ]);
+});
+
 
 
 // REVIEW ROUTES
 Route::get('/reviews/{book:slug}', [ReviewController::class, 'view'])->name('reviews.view');
 Route::middleware('auth')->group(function () {
-    Route::get('/review/create', [ReviewController::class, 'create'])->name('review.create');
-    Route::post('/review', [ReviewController::class, 'store'])->name('review.store');
+    Route::get('/review/create/{book_id}', [ReviewController::class, 'create'])->middleware('block_admin')->name('review.create');
+    Route::post('/review/post/{book_id}', [ReviewController::class, 'store'])->middleware('block_admin')->name('review.store');
     Route::get('/review/edit/{review_id}', [ReviewController::class, 'edit'])->name('review.edit');
     Route::post('/review/update/{review_id}', [ReviewController::class, 'update'])->name('review.update');
     Route::delete('/review/delete/{review_id}', [ReviewController::class, 'destroy'])->name('review.destroy');
@@ -85,51 +104,57 @@ Route::middleware('auth')->group(function () {
 
 
 // UPLOAD ROUTES
-Route::get('/upload', [UploadController::class, 'create']);
-Route::post('/upload/store', [UploadController::class, 'store']);
-Route::post('/upload/delete', [UploadController::class, 'destroy']);
+Route::middleware('auth')->group(function () {
+    Route::get('/upload', [UploadController::class, 'create'])->middleware('block_admin');
+    Route::post('/upload/store', [UploadController::class, 'store'])->middleware('block_admin');
+    Route::get('/upload/edit/{book_id}', [UploadController::class, 'edit'])->name('upload.edit');
+    Route::post('/upload/update/{book_id}', [UploadController::class, 'update'])->name('upload.update');
+    Route::post('/upload/delete/{book_id}', [UploadController::class, 'destroy'])->name('upload.delete');
+});
 
 
 
 // WISHLIST ROUTES
-Route::post('/wishlist/add/{book_id}', function (Request $request, $book_id) {
-    $user = Auth::user();
-
-    // Check if the book exists
-    $book = Book::find($book_id);
-    if (!$book) {
-        return redirect()->back()->withErrors('The book does not exist.');
-    }
-
-    // Prevent duplicate wishlist entries
-    if ($user->wishlist()->where('book_id', $book_id)->exists()) {
-        return redirect()->back()->with('info', 'Book is already in your wishlist.');
-    }
-
-    // Attach the book to the user's wishlist
-    $user->wishlist()->attach($book_id);
-
-    return redirect()->back()->with('success', 'Book added to wishlist!');
-})->middleware(['auth', 'verified']);
-
-Route::post('/wishlist/remove/{book_id}', function (Request $request, $book_id) {
-    $user = Auth::user();
-
-    // Check if the book exists in the user's wishlist
-    if (!$user->wishlist()->where('book_id', $book_id)->exists()) {
-        return redirect()->back()->with('info', 'Book is not in your wishlist.');
-    }
-
-    // Detach the book from the user's wishlist
-    $user->wishlist()->detach($book_id);
-
-    return redirect()->back()->with('success', 'Book removed from wishlist.');
-})->middleware(['auth', 'verified']);
+Route::middleware('auth', 'verified', 'block_admin')->group(function () {
+    Route::post('/wishlist/add/{book_id}', function ($book_id) {
+        $user = Auth::user();
+    
+        // Check if the book exists
+        $book = Book::find($book_id);
+        if (!$book) {
+            return redirect()->back()->withErrors('The book does not exist.');
+        }
+    
+        // Prevent duplicate wishlist entries
+        if ($user->wishlist()->where('book_id', $book_id)->exists()) {
+            return redirect()->back()->with('info', 'Book is already in your wishlist.');
+        }
+    
+        // Attach the book to the user's wishlist
+        $user->wishlist()->attach($book_id);
+    
+        return redirect()->back()->with('success', 'Book added to wishlist!');
+    });
+    
+    Route::post('/wishlist/remove/{book_id}', function ($book_id) {
+        $user = Auth::user();
+    
+        // Check if the book exists in the user's wishlist
+        if (!$user->wishlist()->where('book_id', $book_id)->exists()) {
+            return redirect()->back()->with('info', 'Book is not in your wishlist.');
+        }
+    
+        // Detach the book from the user's wishlist
+        $user->wishlist()->detach($book_id);
+    
+        return redirect()->back()->with('success', 'Book removed from wishlist.');
+    });
+});
 
 
 
 // BASKET ROUTES
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'block_admin')->group(function () {
     Route::get('/basket', [BasketController::class, 'view'])->name('basket.view');
     Route::post('/basket/add/{book_id}', [BasketController::class, 'store'])->name('basket.store');
     Route::post('/basket/update/{item}/{action}', [BasketController::class, 'update'])->name('basket.update');
@@ -142,6 +167,8 @@ Route::get('/dashboard', function () {
     // Get the logged-in user
     $user = Auth::user();
 
+    $users = User::latest()->get();
+
     $books = Book::latest()
         ->with(['author', 'genre'])
         ->where('user_id', $user->id)
@@ -150,6 +177,7 @@ Route::get('/dashboard', function () {
     $wishlist = $user->wishlist()->with(['author', 'genre'])->paginate(12);
 
     return view('dashboard', [
+        'users' => $users,
         'books' => $books,
         'wishlist' => $wishlist
     ]);
@@ -162,6 +190,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+
+// ADMIN ROUTES
+Route::middleware('is_admin')->group(function () {
+    Route::get('/admin/createAdmin', [ProfileController::class, 'createAdminForm'])->name('admin.createAdminForm');
+    Route::post('/admin/createAdmin', [ProfileController::class, 'createAdmin'])->name('admin.createAdmin');
+    Route::delete('/admin/deleteProfile/{user_id}', [ProfileController::class, 'adminDeleteProfile'])->name('admin.deleteProfile');
 });
 
 

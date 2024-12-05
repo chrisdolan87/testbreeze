@@ -16,24 +16,34 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased min-h-screen flex flex-col bg-gray-50">
-    @include('layouts.navigation')
-
-    <!-- Page Heading -->
-    @if (isset($header))
-        <header class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
+<body class="relative font-sans antialiased min-h-screen flex flex-col justify-center bg-gray-50">
+    @if (session('error'))
+        <div class="bg-gray-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
+            <div class="min-w-96 min-h-48 p-4 border border-gray-300 rounded-2xl text-center bg-gray-50">
+                <p class="my-4 text-xl font-bold">Error!</p>
+                <p class="my-4">{{ session('error') }}</p>
+                <a href="/"><x-submit-button text="OK" class="my-4" /></a>
             </div>
-        </header>
+        </div>
     @endif
 
-    <!-- Page Content -->
-    <main class="w-full max-w-7xl mx-auto space-y-8 mt-8 mb-16">
-        {{ $slot }}
-    </main>
+    @if (session('admin_deleted_profile'))
+        <div class="bg-gray-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
+            <div class="min-w-96 min-h-48 p-4 border border-gray-300 rounded-2xl text-center bg-gray-50">
+                <p class="my-4">{{ session('admin_deleted_profile') }}</p>
+                <a href="/dashboard"><x-submit-button text="OK" class="my-4" /></a>
+            </div>
+        </div>
+    @else
+        @include('layouts.navigation')
 
-    <x-footer />
+        <!-- Page Content -->
+        <main class="w-full max-w-7xl mx-auto mt-8 mb-16 p-8 space-y-8 grow">
+            {{ $slot }}
+        </main>
+
+        <x-footer />
+    @endif
 </body>
 
 </html>
