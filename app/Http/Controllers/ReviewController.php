@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Genre;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,9 +13,12 @@ class ReviewController extends Controller
 {
     public function view(Book $book)
     {
+        $genres = Genre::latest()->get();
+
         return view('reviews', [
             'book' => $book,
-            'reviews' => $book->reviews()->paginate(10)
+            'reviews' => $book->reviews()->paginate(10),
+            'genres' => $genres,
         ]);
     }
 
@@ -22,8 +26,11 @@ class ReviewController extends Controller
 
     public function create($book_id)
     {
+        $genres = Genre::latest()->get();
+
         return view('review-form', [
-            'book_id' => $book_id
+            'book_id' => $book_id,
+            'genres' => $genres,
         ]);
     }
 
@@ -72,6 +79,8 @@ class ReviewController extends Controller
         // Find the review by ID
         $review = Review::find($review_id);
 
+        $genres = Genre::latest()->get();
+
         // If the review doesn't exist, redirect back with an error message
         if (!$review) {
             return redirect()->back()->withErrors('Review not found.');
@@ -79,7 +88,8 @@ class ReviewController extends Controller
 
         // Pass the review data to the view
         return view('edit-review', [
-            'review' => $review
+            'review' => $review,
+            'genres' => $genres,
         ]);
     }
 
@@ -96,7 +106,7 @@ class ReviewController extends Controller
 
         // Validate the incoming request
         $attributes = $request->validate([
-            'rating' => ['required'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'review' => ['required', 'min:20'],
         ]);
 

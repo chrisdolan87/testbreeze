@@ -1,11 +1,11 @@
 <x-app-layout>
+    <x-genre-menu :genres="$genres"/>
 
     <x-searchbar />
 
-    <section
-        class="max-w-6xl min-h-min h-full my-8 p-8 flex flex-col md:items-start sm:items-center rounded-3xl bg-gray-100 border border-gray-300 shadow-lg shadow-gray-300 gap-8">
+    <section class="w-full min-h-min h-full mx-auto p-8 flex flex-col md:items-start sm:items-center bg-white gap-8">
 
-        <div id="details" class="w-full flex flex-col">
+        <div class="max-w-6xl w-full mx-auto p-8 flex flex-col">
             <h2 class="text-2xl mb-4">Customer Reviews</h2>
 
             @if (count($reviews) > 0)
@@ -52,12 +52,12 @@
                         type="submit">Leave a Review</button>
                 </form>
             @endif
+            <div class="max-w-6xl w-full mx-auto mt-8">
+                <x-back-button />
+            </div>
         </div>
 
-    </section>
 
-    <div class="max-w-6xl my-8">
-        <x-back-button />
-    </div>
+    </section>
 
 </x-app-layout>

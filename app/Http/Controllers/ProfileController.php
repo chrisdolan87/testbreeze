@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,8 +21,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $genres = Genre::latest()->get();
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'genres' => $genres,
         ]);
     }
 
@@ -81,7 +85,11 @@ class ProfileController extends Controller
 
     public function createAdminForm()
     {
-        return view('create-admin');
+        $genres = Genre::latest()->get();
+
+        return view('create-admin', [
+            'genres' => $genres,
+        ]);
     }
 
 
@@ -92,7 +100,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
         User::factory()->create([

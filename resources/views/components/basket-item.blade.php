@@ -4,7 +4,7 @@
     <!-- Book details -->
     <div class="w-5/12 h-48 flex items-center py-4 gap-8">
         <a class="h-full" href="/books/{{ $item->book->slug }}">
-            <img id="image" class="h-full my-auto shadow-md shadow-gray-300"
+            <img id="image" class="h-full my-auto shadow-md shadow-slate-800"
                 src="{{ asset('storage/' . $item->book->image) }}" alt="Book image">
         </a>
 

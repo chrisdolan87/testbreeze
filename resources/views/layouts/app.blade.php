@@ -14,9 +14,12 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
+
 </head>
 
-<body class="relative font-sans antialiased min-h-screen flex flex-col justify-center bg-gray-50">
+<body class="relative font-sans antialiased min-h-screen flex flex-col justify-center" style="">
     @if (session('error'))
         <div class="bg-gray-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
             <div class="min-w-96 min-h-48 p-4 border border-gray-300 rounded-2xl text-center bg-gray-50">
@@ -38,7 +41,7 @@
         @include('layouts.navigation')
 
         <!-- Page Content -->
-        <main class="w-full max-w-7xl mx-auto mt-8 mb-16 p-8 space-y-8 grow">
+        <main class="w-full mx-auto">
             {{ $slot }}
         </main>
 

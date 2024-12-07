@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -27,50 +28,71 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 |
 */
 
+// ROUTE FOR HOME PAGE
 Route::get('/', function () {
     $books = Book::latest()
         ->with(['author', 'genre']); // Eager load author and genre relationships for efficiency
-
-    if ($search = request('search')) {
-        $books->where('title', 'like', '%' . $search . '%')
-            ->orWhereHas('author', function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%'); // Search in the author's name
-            })
-            ->orWhereHas('genre', function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%'); // Search in the genre's name
-            });
-    }
+    $genres = Genre::latest()->get();
 
     return view('home', [
-        'books' => $books->paginate(20)
+        'books' => $books->paginate(20),
+        'genres' => $genres,
     ]);
 })->name('home');
 
+
+
+// ROUTE TO SINGLE BOOK PAGE
 Route::get('/books/{book:slug}', function (Book $book) {
+    $genres = Genre::latest()->get();
+
     return view('book', [
-        'book' => $book
+        'book' => $book,
+        'genres' => $genres,
     ]);
 });
 
+
+
+// ROUTE TO VIEW ALL BOOKS IN A SPECIFIC GENRE
 Route::get('/genres/{genre:slug}', function (Genre $genre) {
+    $genres = Genre::latest()->get();
+
     return view('home', [
-        'books' => $genre->books()->with(['genre', 'author'])->paginate(12)
+        'books' => $genre->books()->with(['genre', 'author'])->paginate(12),
+        'genres' => $genres,
     ]);
 });
 
+
+
+// ROUTE TO VIEW ALL BOOKS BY A SPECIFIC AUTHOR
 Route::get('/authors/{author:slug}', function (Author $author) {
+    $genres = Genre::latest()->get();
+
     return view('home', [
-        'books' => $author->books()->with(['genre', 'author'])->paginate(12)
+        'books' => $author->books()->with(['genre', 'author'])->paginate(12),
+        'genres' => $genres,
     ]);
 });
 
+
+
+// ROUTE TO VIEW ALL BOOKS FROM A SPECIFIC USER
 Route::get('/users/{user:username}', function (User $user) {
+    $genres = Genre::latest()->get();
+
     return view('home', [
-        'books' => $user->books()->with(['genre', 'author'])->paginate(12)
+        'books' => $user->books()->with(['genre', 'author'])->paginate(12),
+        'genres' => $genres,
     ]);
 });
 
+
+
+// ROUTE TO VIEW ALL BOOKS BASED ON USER SEARCH
 Route::get('/search', function (Request $request) {
+    $genres = Genre::latest()->get();
     $search = $request->input('search');
 
     $books = Book::latest()
@@ -85,13 +107,40 @@ Route::get('/search', function (Request $request) {
         ->paginate(12);
 
     return view('home', [
-        'books' => $books
+        'books' => $books,
+        'genres' => $genres,
     ]);
 });
 
 
 
-// REVIEW ROUTES
+// ROUTE TO VIEW DASHBOARD WHEN LOGGED IN
+Route::get('/dashboard', function () {
+    // Get the logged-in user
+    $user = Auth::user();
+
+    $users = User::latest()->get();
+
+    $genres = Genre::latest()->get();
+
+    $books = Book::latest()
+        ->with(['author', 'genre'])
+        ->where('user_id', $user->id)
+        ->paginate(12);
+
+    $wishlist = $user->wishlist()->with(['author', 'genre'])->paginate(12);
+
+    return view('dashboard', [
+        'users' => $users,
+        'books' => $books,
+        'genres' => $genres,
+        'wishlist' => $wishlist
+    ]);
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+// ALL REVIEW ROUTES
 Route::get('/reviews/{book:slug}', [ReviewController::class, 'view'])->name('reviews.view');
 Route::middleware('auth')->group(function () {
     Route::get('/review/create/{book_id}', [ReviewController::class, 'create'])->middleware('block_admin')->name('review.create');
@@ -103,7 +152,7 @@ Route::middleware('auth')->group(function () {
 
 
 
-// UPLOAD ROUTES
+// ALL UPLOAD ROUTES
 Route::middleware('auth')->group(function () {
     Route::get('/upload', [UploadController::class, 'create'])->middleware('block_admin');
     Route::post('/upload/store', [UploadController::class, 'store'])->middleware('block_admin');
@@ -118,35 +167,35 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth', 'verified', 'block_admin')->group(function () {
     Route::post('/wishlist/add/{book_id}', function ($book_id) {
         $user = Auth::user();
-    
+
         // Check if the book exists
         $book = Book::find($book_id);
         if (!$book) {
             return redirect()->back()->withErrors('The book does not exist.');
         }
-    
+
         // Prevent duplicate wishlist entries
         if ($user->wishlist()->where('book_id', $book_id)->exists()) {
             return redirect()->back()->with('info', 'Book is already in your wishlist.');
         }
-    
+
         // Attach the book to the user's wishlist
         $user->wishlist()->attach($book_id);
-    
+
         return redirect()->back()->with('success', 'Book added to wishlist!');
     });
-    
+
     Route::post('/wishlist/remove/{book_id}', function ($book_id) {
         $user = Auth::user();
-    
+
         // Check if the book exists in the user's wishlist
         if (!$user->wishlist()->where('book_id', $book_id)->exists()) {
             return redirect()->back()->with('info', 'Book is not in your wishlist.');
         }
-    
+
         // Detach the book from the user's wishlist
         $user->wishlist()->detach($book_id);
-    
+
         return redirect()->back()->with('success', 'Book removed from wishlist.');
     });
 });
@@ -160,28 +209,6 @@ Route::middleware('auth', 'block_admin')->group(function () {
     Route::post('/basket/update/{item}/{action}', [BasketController::class, 'update'])->name('basket.update');
     Route::delete('/basket/remove/{book_id}', [BasketController::class, 'destroy'])->name('basket.destroy');
 });
-
-
-
-Route::get('/dashboard', function () {
-    // Get the logged-in user
-    $user = Auth::user();
-
-    $users = User::latest()->get();
-
-    $books = Book::latest()
-        ->with(['author', 'genre'])
-        ->where('user_id', $user->id)
-        ->paginate(12);
-
-    $wishlist = $user->wishlist()->with(['author', 'genre'])->paginate(12);
-
-    return view('dashboard', [
-        'users' => $users,
-        'books' => $books,
-        'wishlist' => $wishlist
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 
 

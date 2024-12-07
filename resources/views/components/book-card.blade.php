@@ -1,9 +1,10 @@
 @props(['book'])
 
-<article class="min-w-40 max-w-56 flex flex-col bg-gray-50 border border-gray-300 rounded-xl overflow-hidden shadow-md shadow-gray-300">
+<article class="min-w-40 max-w-56 flex flex-col bg-gray-50 border border-gray-300 rounded-xl overflow-hidden shadow-md shadow-slate-800">
 
     <a class="min-w-40 min-h-56 h-2/3 flex justify-center mt-4" href="/books/{{ $book->slug }}">
-        <img class="max-w-36 w-full max-h-56 h-full mx-4 object-cover shadow-md shadow-gray-300"
+        
+        <img class="max-w-36 w-full max-h-56 h-full mx-4 object-contain shadow-md shadow-slate-800"
             src="{{ asset('storage/' . $book->image) }}" alt="">
     </a>
 

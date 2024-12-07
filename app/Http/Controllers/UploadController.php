@@ -13,10 +13,12 @@ class UploadController extends Controller
 {
     public function create()
     {
-        return view('upload');
+        $genres = Genre::latest()->get();
+
+        return view('upload', [
+            'genres' => $genres,
+        ]);
     }
-
-
 
     public function store()
     {
@@ -48,8 +50,10 @@ class UploadController extends Controller
         );
 
         // Store the image
-        if (request()->hasFile('image')) {
+        if (request()->hasFile('image') && request()->file('image')->isValid()) {
             $attributes['image'] = request()->file('image')->store('images', 'public');
+        } else {
+            dd('No valid image uploaded');
         }
 
         Book::create([
@@ -70,6 +74,8 @@ class UploadController extends Controller
 
     public function edit($book_id)
     {
+        $genres = Genre::latest()->get();
+
         // Find the book by ID
         $book = Book::find($book_id);
 
@@ -80,7 +86,8 @@ class UploadController extends Controller
 
         // Pass the book data to the view
         return view('edit-upload', [
-            'book' => $book
+            'book' => $book,
+            'genres' => $genres,
         ]);
     }
 
@@ -88,6 +95,8 @@ class UploadController extends Controller
 
     public function update($book_id)  // Pass $book_id from the URL
     {
+        $genres = Genre::latest()->get();
+
         // Retrieve the book by ID
         $book = Book::find($book_id);
 
@@ -127,8 +136,7 @@ class UploadController extends Controller
         // Store the image
         if (request()->hasFile('image')) {
             $attributes['image'] = request()->file('image')->store('images', 'public');
-        }
-        else $attributes['image'] = $book->image;
+        } else $attributes['image'] = $book->image;
 
         // Update the book with validated data
         $book->update([
