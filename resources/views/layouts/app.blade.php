@@ -14,26 +14,31 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
+
 </head>
 
-<body class="font-sans antialiased min-h-screen flex flex-col bg-gray-50">
-    @include('layouts.navigation')
-
-    <!-- Page Heading -->
-    @if (isset($header))
-        <header class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
+<body class="relative font-sans antialiased min-h-screen flex flex-col justify-center" style="">
+    @if (session('error'))
+        <div class="bg-slate-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
+            <div class="min-w-96 min-h-48 p-4 border border-slate-300 rounded-2xl text-center bg-slate-50">
+                <p class="my-4 text-xl font-bold">Error!</p>
+                <p class="my-4">{{ session('error') }}</p>
+                <a href="/"><x-submit-button text="OK" class="mt-4 text-yellow-400" style="background:#00242A" /></a>
             </div>
-        </header>
+        </div>
+    @else
+
+        @include('layouts.navigation')
+
+        <!-- Page Content -->
+        <main class="w-full mx-auto">
+            {{ $slot }}
+        </main>
+
+        <x-footer />
     @endif
-
-    <!-- Page Content -->
-    <main class="w-full max-w-7xl mx-auto space-y-8 mt-8 mb-16">
-        {{ $slot }}
-    </main>
-
-    <x-footer />
 </body>
 
 </html>

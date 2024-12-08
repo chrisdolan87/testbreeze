@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Basket;
+use App\Models\Genre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,13 +12,16 @@ class BasketController extends Controller
 
     public function view(Request $request)
     {
+        $genres = Genre::latest()->get();
+
         // Get the logged-in user
         $user = Auth::user();
 
         $basket = $user->basket()->paginate(12);
 
         return view('basket', [
-            'basket' => $basket
+            'basket' => $basket,
+            'genres' => $genres,
         ]);
     }
 
@@ -36,7 +40,7 @@ class BasketController extends Controller
 
 
 
-    public function update(Request $request, $item_id, $action)
+    public function update($item_id, $action)
     {
         // Find the basket item
         $item = Basket::findOrFail($item_id);
@@ -57,7 +61,7 @@ class BasketController extends Controller
 
 
 
-    public function destroy(Request $request, $book_id)
+    public function destroy($book_id)
     {
         // Remove book from basket
         Basket::where('user_id', Auth::id())

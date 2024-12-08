@@ -1,7 +1,7 @@
-<div class="w-full flex justify-center">
+<div class="w-full p-8 flex justify-center" style="background:#00242A">
 
-    <form action="#" method="get">
-        <input class="w-96 rounded-xl border border-gray-300 shadow-gray-400 shadow-md" type="text" name="search" id="search" placeholder="Search for title, author, genre..." value="{{ request('search') }}">
+    <form action="/search" method="get" class="max-w-2xl w-full">
+        <input class="w-full rounded-xl border border-slate-800 shadow shadow-slate-800" type="text" name="search" id="search" placeholder="Search for title, author, genre..." value="{{ request('search') }}">
     </form>
 
 </div>

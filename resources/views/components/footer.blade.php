@@ -1,15 +1,34 @@
-<footer class="min-h-52 relative bottom-0 mt-auto flex justify-between bg-gray-200">
+<footer class="w-full min-h-52 relative bottom-0 mt-auto flex justify-center text-white" style="background:#00242A">
 
-    <div id="logo" class="flex p-6 items-center">
-        <a class="text-2xl font-semibold text-gray-600 hover:text-gray-900 focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500"
-            href="/">
-            Book Store</a>
-    </div>
+    <div class="max-w-7xl mx-auto flex justify-between py-8">
+        <div id="logo" class="flex items-center">
+            <a class="text-2xl font-bold" href="/">
+                Book Store</a>
+        </div>
 
-    <div class="w-3/4 flex items-center p-6">
-        <div class="flex p-4 text-xs">Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quis magnam mollitia maiores at iure voluptatum consequuntur quaerat dignissimos rem.</div>
-        <div class="flex p-4 text-xs">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laboriosam amet non quod cumque ex molestiae animi est aperiam, eligendi dolores.</div>
-        <div class="flex p-4 text-xs">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti fugit corrupti ipsa, quod esse iure corporis similique ut eveniet nobis.</div>
+        <div class="w-3/4 flex items-center text-center gap-8">
+            <div class="w-1/3 text-xs">
+                <h4 class="text-sm font-bold mb-2">About Us</h4>
+                <p>We are a family-owned bookshop offering a wide range of books, from bestsellers to hidden gems. Our
+                    goal
+                    is to provide a cozy and welcoming space for readers of all ages.</p>
+            </div>
+            <div class="w-1/3 text-xs">
+                <h4 class="text-sm font-bold mb-2">Contact Information</h4>
+                <p>Have questions? Get in touch with us:</p>
+                <p>Email: <a href="mailto:info@bookshop.com">info@bookshop.com</a></p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+            <div class="w-1/3 text-xs">
+                <h4 class="text-sm font-bold mb-2">Follow Us</h4>
+                <p>Stay updated with the latest releases and promotions:</p>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
 </footer>

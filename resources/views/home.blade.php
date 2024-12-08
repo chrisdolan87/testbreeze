@@ -1,16 +1,23 @@
 <x-app-layout>
 
+    <x-genre-menu :genres="$genres"/>
+
     <x-searchbar />
 
-    <section
-        class="min-h-min h-full m-8 p-8 rounded-3xl bg-gray-100 border border-gray-300 shadow-lg">
-        <div class="mb-8 grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 gap-x-8 gap-y-8">
-            @foreach ($books as $book)
-            <x-book-card :book="$book" />
-            @endforeach
+    <section class="w-full min-h-min h-full mx-auto p-8 flex flex-col md:items-start sm:items-center bg-white gap-8">
+        <div class="max-w-6xl w-full mx-auto p-8 flex flex-col gap-8">
+            <div class="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 gap-8">
+                @foreach ($books as $book)
+                    <x-book-card :book="$book" />
+                @endforeach
+            </div>
+
+            {{ $books->links() }}
+            <div class="max-w-6xl w-full mx-auto mt-8">
+                <x-back-button />
+            </div>
         </div>
 
-        {{ $books->links() }}
     </section>
 
 </x-app-layout>

@@ -1,16 +1,37 @@
 <x-app-layout>
+    <x-genre-menu :genres="$genres" />
 
     <x-searchbar />
 
-    <section
-        class="min-h-min h-full m-8 p-8 flex flex-col md:items-start sm:items-center rounded-3xl bg-gray-100 border border-gray-300 shadow-lg gap-8">
+    <section class="w-full min-h-min h-full mx-auto p-8 flex flex-col md:items-start sm:items-center bg-white gap-8">
 
-        <div id="details" class="w-full flex flex-col">
+        <div class="max-w-6xl w-full mx-auto p-8 flex flex-col">
             <h2 class="text-2xl mb-4">Customer Reviews</h2>
+
+            @if (session('review-added'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-added') }}
+                </div>
+            @endif
+            @if (session('already-reviewed'))
+                <div class="p-4 mb-4 bg-red-400 border border-red-600 rounded-xl text-center alert alert-success">
+                    {{ session('already-reviewed') }}
+                </div>
+            @endif
+            @if (session('review-updated'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-updated') }}
+                </div>
+            @endif
+            @if (session('review-deleted'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-deleted') }}
+                </div>
+            @endif
 
             @if (count($reviews) > 0)
                 @foreach ($reviews as $review)
-                    <div class=" w-full flex flex-col py-8 gap-2 border-t border-gray-400">
+                    <div class="w-full flex flex-col py-8 gap-2 border-t border-gray-400">
                         <p class="mb-2">Rating: <span class="font-bold text-yellow-600">{{ $review->rating }}/5</span>
                         </p>
                         <p class="w-fit mb-4">{{ $review->review }}</p>
@@ -20,24 +41,21 @@
                         <!-- Buttons -->
                         @if (Auth::check())
                             <!-- Check if a user is logged in -->
-                            @if ($review->user_id == Auth::user()->id)
+                            @if ($review->user_id == Auth::user()->id || Auth::user()->is_admin == true)
                                 <!-- If the review's user_id == the logged in user's id, display buttons to edit/delete the review -->
                                 <div class="flex mt-2 gap-4 lg:justify-normal">
-                                    <form action="/review/edit/{{$review->id}}" method="GET">
+                                    <form action="/review/edit/{{ $review->id }}" method="GET">
                                         @csrf
                                         <input type="hidden" name="book_slug" value="{{ $book->slug }}">
-                                        <button
-                                            class="w-36 h-8 bg-yellow-300 border border-yellow-500 rounded-lg shadow-gray-400 shadow-md hover:bg-yellow-200"
-                                            type="submit">Edit Review</button>
+                                        <x-submit-button text="Edit Review"
+                                            class="bg-yellow-200 border-yellow-300 hover:bg-yellow-100" />
                                     </form>
 
-                                    <form action="/review/delete/{{$review->id}}" method="POST">
+                                    <form action="/review/delete/{{ $review->id }}" method="POST">
                                         @csrf
                                         @method('delete')
-                                        <input type="hidden" name="book_slug" value="{{ $book->slug }}">
-                                        <button
-                                            class="w-36 h-8 bg-red-400 border border-red-600 rounded-lg shadow-gray-400 shadow-md hover:bg-red-300"
-                                            type="submit">Delete Review</button>
+                                        <x-submit-button text="Delete Review"
+                                            class="bg-red-300 border-red-400 hover:bg-red-200" />
                                     </form>
                                 </div>
                             @endif
@@ -46,24 +64,22 @@
                     </div>
                 @endforeach
             @else
-                <p>Sorry, no readers have reviewed this book yet.</p>
+                <p class="w-full flex flex-col py-8">Sorry, no readers have reviewed this book yet.</p>
             @endif
 
-            <form action="/review/create" method="GET">
-                @csrf
-                <input type="hidden" name="book_id" value="{{ $book->id }}">
-                <input type="hidden" name="book_slug" value="{{ $book->slug }}">
-                <button class="w-full mt-4 pt-8 underline hover:no-underline border-t border-gray-400"
-                    type="submit">Leave a Review</button>
-            </form>
-
+            @if (Auth::check() && $book->user_id != Auth::user()->id && Auth::user()->is_admin == false)
+                <form action="/review/create/{{ $book->id }}" method="GET">
+                    @csrf
+                    <button class="w-full mt-4 pt-8 underline hover:no-underline border-t border-gray-400"
+                        type="submit">Leave a Review</button>
+                </form>
+            @endif
+            <div class="max-w-6xl w-full mx-auto mt-8">
+                <x-back-button />
+            </div>
         </div>
 
-    </section>
 
-    <a class="w-min mt-4" href="/books/{{ $book->slug }}"><button
-            class="min-w-40 w-fit h-10 px-4 mt-8 mx-8 bg-gray-300 border border-gray-500 rounded-lg shadow-gray-400 shadow-md hover:bg-gray-200">
-            Go Back</button>
-    </a>
+    </section>
 
 </x-app-layout>
