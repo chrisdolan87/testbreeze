@@ -59,7 +59,7 @@ class ReviewController extends Controller
 
         // If there is already a review for this book by this user, redirect back
         if ($existingReview) {
-            return redirect("/reviews/$book->slug")->with('error', 'You have already reviewed this book.');
+            return redirect("/reviews/$book->slug")->with('already-reviewed', 'You have already reviewed this book.');
         }
 
         Review::create([
@@ -69,7 +69,7 @@ class ReviewController extends Controller
             'review' => $attributes['review'],
         ]);
 
-        return redirect("/reviews/$book->slug")->with('review-added', 'Review added!');
+        return redirect("/reviews/$book->slug")->with('review-added', 'Review added. Thank you!');
     }
 
 

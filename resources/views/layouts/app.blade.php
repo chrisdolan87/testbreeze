@@ -21,23 +21,15 @@
 
 <body class="relative font-sans antialiased min-h-screen flex flex-col justify-center" style="">
     @if (session('error'))
-        <div class="bg-gray-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
-            <div class="min-w-96 min-h-48 p-4 border border-gray-300 rounded-2xl text-center bg-gray-50">
+        <div class="bg-slate-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
+            <div class="min-w-96 min-h-48 p-4 border border-slate-300 rounded-2xl text-center bg-slate-50">
                 <p class="my-4 text-xl font-bold">Error!</p>
                 <p class="my-4">{{ session('error') }}</p>
-                <a href="/"><x-submit-button text="OK" class="my-4" /></a>
-            </div>
-        </div>
-    @endif
-
-    @if (session('admin_deleted_profile'))
-        <div class="bg-gray-800 bg-opacity-80 min-h-screen min-w-full absolute content-center place-items-center">
-            <div class="min-w-96 min-h-48 p-4 border border-gray-300 rounded-2xl text-center bg-gray-50">
-                <p class="my-4">{{ session('admin_deleted_profile') }}</p>
-                <a href="/dashboard"><x-submit-button text="OK" class="my-4" /></a>
+                <a href="/"><x-submit-button text="OK" class="mt-4 text-yellow-400" style="background:#00242A" /></a>
             </div>
         </div>
     @else
+
         @include('layouts.navigation')
 
         <!-- Page Content -->

@@ -1,11 +1,16 @@
 <x-app-layout>
-    <x-genre-menu :genres="$genres"/>
+    <x-genre-menu :genres="$genres" />
 
     <x-searchbar />
 
     <section class="w-full min-h-min h-full mx-auto p-8 flex flex-col md:items-start sm:items-center bg-white gap-8">
 
         <div class="max-w-5xl w-full mx-auto p-8 flex flex-col gap-8">
+            @if (session('book-updated'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('book-updated') }}
+                </div>
+            @endif
             <div class="h-96 flex md:flex-row sm:flex-col gap-8 md:items-start sm:items-center">
                 <img class="max-w-72 max-h-96 shadow-md shadow-slate-800" src="{{ asset('storage/' . $book->image) }}"
                     alt="Book image">
@@ -22,12 +27,22 @@
                     </div>
 
                     <div>
-                        <div class="flex mb-2 gap-8">
-                            <p>Rating:
-                                <span class="font-bold text-yellow-600">
-                                    {{ number_format($book->reviews->avg('rating'), 0) }}/5
-                                </span>
-                            </p>
+                        <div class="flex items-center mb-2 gap-4">
+                            @if ($book->reviews->avg('rating') > 0 && $book->reviews->avg('rating') < 1.5)
+                                <img class="h-4" src="{{ asset('storage/' . 'images/1star.png') }}" alt="Book image">
+                            @endif
+                            @if ($book->reviews->avg('rating') >= 1.5 && $book->reviews->avg('rating') < 2.5)
+                                <img class="h-4" src="{{ asset('storage/' . 'images/2stars.png') }}" alt="Book image">
+                            @endif
+                            @if ($book->reviews->avg('rating') >= 2.5 && $book->reviews->avg('rating') < 3.5)
+                                <img class="h-4" src="{{ asset('storage/' . 'images/3stars.png') }}" alt="Book image">
+                            @endif
+                            @if ($book->reviews->avg('rating') >= 3.5 && $book->reviews->avg('rating') < 4.5)
+                                <img class="h-4" src="{{ asset('storage/' . 'images/4stars.png') }}" alt="Book image">
+                            @endif
+                            @if ($book->reviews->avg('rating') >= 4.5)
+                                <img class="h-4" src="{{ asset('storage/' . 'images/5stars.png') }}" alt="Book image">
+                            @endif
 
                             <a class="underline hover:no-underline"
                                 href="/reviews/{{ $book->slug }}">{{ count($book->reviews) }} Reviews</a>

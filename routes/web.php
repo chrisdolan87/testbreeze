@@ -5,6 +5,7 @@ use App\Http\Controllers\BasketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UploadController;
+use App\Mail\Welcome;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Genre;
@@ -13,6 +14,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use League\CommonMark\Extension\FrontMatter\Data\LibYamlFrontMatterParser;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
@@ -27,6 +29,12 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// // EMAIL TEST ROUTE
+// Route::get('/emailtest', function () {
+//     Mail::to('d7oln@hotmail.com')->send(new Welcome);
+//     return 'Test email sent';
+// });
 
 // ROUTE FOR HOME PAGE
 Route::get('/', function () {
@@ -142,7 +150,8 @@ Route::get('/dashboard', function () {
 
 // ALL REVIEW ROUTES
 Route::get('/reviews/{book:slug}', [ReviewController::class, 'view'])->name('reviews.view');
-Route::middleware('auth')->group(function () {
+
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/review/create/{book_id}', [ReviewController::class, 'create'])->middleware('block_admin')->name('review.create');
     Route::post('/review/post/{book_id}', [ReviewController::class, 'store'])->middleware('block_admin')->name('review.store');
     Route::get('/review/edit/{review_id}', [ReviewController::class, 'edit'])->name('review.edit');
@@ -153,7 +162,7 @@ Route::middleware('auth')->group(function () {
 
 
 // ALL UPLOAD ROUTES
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/upload', [UploadController::class, 'create'])->middleware('block_admin');
     Route::post('/upload/store', [UploadController::class, 'store'])->middleware('block_admin');
     Route::get('/upload/edit/{book_id}', [UploadController::class, 'edit'])->name('upload.edit');
@@ -203,7 +212,7 @@ Route::middleware('auth', 'verified', 'block_admin')->group(function () {
 
 
 // BASKET ROUTES
-Route::middleware('auth', 'block_admin')->group(function () {
+Route::middleware('auth', 'verified', 'block_admin')->group(function () {
     Route::get('/basket', [BasketController::class, 'view'])->name('basket.view');
     Route::post('/basket/add/{book_id}', [BasketController::class, 'store'])->name('basket.store');
     Route::post('/basket/update/{item}/{action}', [BasketController::class, 'update'])->name('basket.update');
@@ -213,7 +222,7 @@ Route::middleware('auth', 'block_admin')->group(function () {
 
 
 // PROFILE ROUTES
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -222,7 +231,7 @@ Route::middleware('auth')->group(function () {
 
 
 // ADMIN ROUTES
-Route::middleware('is_admin')->group(function () {
+Route::middleware('is_admin', 'verified')->group(function () {
     Route::get('/admin/createAdmin', [ProfileController::class, 'createAdminForm'])->name('admin.createAdminForm');
     Route::post('/admin/createAdmin', [ProfileController::class, 'createAdmin'])->name('admin.createAdmin');
     Route::delete('/admin/deleteProfile/{user_id}', [ProfileController::class, 'adminDeleteProfile'])->name('admin.deleteProfile');

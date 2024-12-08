@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Validation\Rules;
 
@@ -73,12 +74,18 @@ class ProfileController extends Controller
         $user = User::find($user_id);
 
         if ($user->id == Auth::user()->id) {
-            return redirect()->back()->with('admin_deleted_profile', 'Cannot delete own profile.');
+            return redirect()->back()->with('admin-cannot-delete', 'You cannot delete your own profile.');
+        }
+
+        // Delete all the user's books and their associated images before deleting the user
+        foreach ($user->books as $book) {
+            Storage::delete($book->image);
+            $book->delete();
         }
 
         $user->delete();
 
-        return redirect()->back()->with('admin_deleted_profile', 'Profile deleted.');
+        return redirect()->back()->with('admin-user-deleted', 'User deleted.');
     }
 
 
@@ -111,7 +118,7 @@ class ProfileController extends Controller
             'is_admin' => true,
         ]);
 
-        return redirect('/dashboard')->with('admin_user_created', 'Admin user created.');
+        return redirect('/dashboard')->with('admin-created', 'Admin user created successfully.');
     }
 
 }

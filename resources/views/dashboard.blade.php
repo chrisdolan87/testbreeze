@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-genre-menu :genres="$genres"/>
+    <x-genre-menu :genres="$genres" />
 
     <x-searchbar />
 
@@ -12,9 +12,15 @@
 
                 <h2 class="text-2xl">My Books for Sale</h2>
 
+                @if (session('book-added'))
+                    <div
+                        class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                        {{ session('book-added') }}
+                    </div>
+                @endif
                 @if (session('book-deleted'))
                     <div
-                        class="p-4 mb-8 bg-green-500 border border-green-600 rounded-xl text-center alert alert-success">
+                        class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
                         {{ session('book-deleted') }}
                     </div>
                 @endif
@@ -63,6 +69,25 @@
 
                 <h2 class="text-2xl">All Users</h2>
 
+                @if (session('admin-created'))
+                    <div
+                        class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                        {{ session('admin-created') }}
+                    </div>
+                @endif
+                @if (session('user-deleted'))
+                    <div
+                        class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                        {{ session('admin-user-deleted') }}
+                    </div>
+                @endif
+                @if (session('admin-cannot-delete'))
+                    <div
+                        class="p-4 mb-4 bg-red-400 border border-red-600 rounded-xl text-center alert alert-success">
+                        {{ session('admin-cannot-delete') }}
+                    </div>
+                @endif
+
                 <table class="w-full text-left">
                     <tr class="border-b-2 border-gray-300 leading-10">
                         <th class="">Name</th>
@@ -83,7 +108,8 @@
                                 <td class="text-center">No</td>
                             @endif
                             <td class="text-center underline hover:no-underline">
-                                <form action="/admin/deleteProfile/{{ $user->id }}" method="POST">
+                                <form action="/admin/deleteProfile/{{ $user->id }}" method="POST"
+                                    onsubmit="return confirmDelete();">
                                     @csrf
                                     @method('delete')
                                     <button type="submit" class="underline hover:no-underline">Delete</button>
@@ -105,3 +131,9 @@
     </section>
 
 </x-app-layout>
+
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this profile? This action cannot be undone.");
+    }
+</script>

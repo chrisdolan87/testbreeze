@@ -7,6 +7,8 @@ use App\Models\Book;
 use App\Models\Genre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UploadController extends Controller
@@ -67,7 +69,7 @@ class UploadController extends Controller
             'price' => $attributes['price']
         ]);
 
-        return redirect('/dashboard')->with('success', 'Book created successfully!');
+        return redirect('/dashboard')->with('book-added', 'Book added successfully!');
     }
 
 
@@ -132,10 +134,13 @@ class UploadController extends Controller
             ['name' => $attributes['genre']] // If not found, create with name and slug
         );
 
-        ////////////////////////////////////////////////////////////! DELETE OLD IMAGE ////////////////////////////////////////////////////////////////////
         // Store the image
         if (request()->hasFile('image')) {
             $attributes['image'] = request()->file('image')->store('images', 'public');
+            // Delete the old book image from storage
+            if ($book->image) {
+                Storage::delete($book->image);
+            }
         } else $attributes['image'] = $book->image;
 
         // Update the book with validated data
@@ -164,6 +169,11 @@ class UploadController extends Controller
             return redirect()->back()->withErrors('Book not found.');
         }
 
+        // Delete the book image from storage
+        if ($book->image) {
+            Storage::delete($book->image);
+        }
+
         // Delete the book
         $book->delete();
 
@@ -174,22 +184,18 @@ class UploadController extends Controller
 
     private function generateUniqueSlug($title, $book)
     {
-        // Generate a base slug
-        $baseSlug = Str::slug($title);
+        // Make a slug from the title as normal
+        $slug = Str::slug($title);
 
-        // Initialize the unique slug with the base slug
-        $titleSlug = $baseSlug;
-
-        // Set a counter for incrementing
+        // Create an counter to add to the end of the slug if it already exists in the database
         $counter = 1;
 
-        // Check if the slug exists in the database
-        while ($book::where('slug', $titleSlug)->exists()) {
-            // Append the counter to the base slug
-            $titleSlug = $baseSlug . '-' . $counter;
-            $counter++;
+        while ($book::where('slug', $slug)->exists()) {
+            // If slug exists in the DB, add the counter to the end and check again
+            $slug = $slug . '-' . $counter;
+            $counter++; // Increment the counter
         }
 
-        return $titleSlug;
+        return $slug;
     }
 }

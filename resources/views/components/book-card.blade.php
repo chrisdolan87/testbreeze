@@ -8,7 +8,7 @@
             src="{{ asset('storage/' . $book->image) }}" alt="">
     </a>
 
-    <div class="min-h-1/3 h-fit mb-4 mx-4 mt-2 flex flex-col justify-between grow">
+    <div class="h-1/3 mb-4 mx-4 mt-2 flex flex-col justify-between">
         <div>
             <a class="hover:underline" href="/books/{{ $book->slug }}">
                 <p class="sm:text-sm md:text-base font-bold">{{ $book->title }}</p>

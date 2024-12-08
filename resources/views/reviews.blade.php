@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-genre-menu :genres="$genres"/>
+    <x-genre-menu :genres="$genres" />
 
     <x-searchbar />
 
@@ -7,6 +7,27 @@
 
         <div class="max-w-6xl w-full mx-auto p-8 flex flex-col">
             <h2 class="text-2xl mb-4">Customer Reviews</h2>
+
+            @if (session('review-added'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-added') }}
+                </div>
+            @endif
+            @if (session('already-reviewed'))
+                <div class="p-4 mb-4 bg-red-400 border border-red-600 rounded-xl text-center alert alert-success">
+                    {{ session('already-reviewed') }}
+                </div>
+            @endif
+            @if (session('review-updated'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-updated') }}
+                </div>
+            @endif
+            @if (session('review-deleted'))
+                <div class="p-4 mb-4 bg-green-400 border border-green-600 rounded-xl text-center alert alert-success">
+                    {{ session('review-deleted') }}
+                </div>
+            @endif
 
             @if (count($reviews) > 0)
                 @foreach ($reviews as $review)
@@ -18,7 +39,8 @@
                             {{ $review->created_at->format('d F Y') }}</p>
 
                         <!-- Buttons -->
-                        @if (Auth::check()) <!-- Check if a user is logged in -->
+                        @if (Auth::check())
+                            <!-- Check if a user is logged in -->
                             @if ($review->user_id == Auth::user()->id || Auth::user()->is_admin == true)
                                 <!-- If the review's user_id == the logged in user's id, display buttons to edit/delete the review -->
                                 <div class="flex mt-2 gap-4 lg:justify-normal">

@@ -10,8 +10,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Mail\Welcome;
+use Illuminate\Mail\Mailable;
 
 class RegisteredUserController extends Controller
 {
@@ -47,6 +50,8 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        Mail::to($user)->send(new Welcome);
 
         return redirect(RouteServiceProvider::HOME);
     }
